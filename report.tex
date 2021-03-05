@@ -19,12 +19,13 @@
     draft=false,            % value for draft version
 ]{scrreprt}
 
-\newcommand{\reportTitle}{\textcolor{ugent_blue}{Your report title}} 
-\newcommand{\reportName}{\textbf{Your name}}
-\newcommand{\reportSubject}{\emph{Your report subject}}
+\newcommand{\reportTitle}{\textcolor{ugent_blue}{Report restricted Hartree Fock}} 
+\newcommand{\reportName}{\textbf{Ruben Van der Stichelen}}
+\newcommand{\reportSubject}{\emph{Programming project}}
 \newcommand{\reportDate}{}
 \newcommand{\reportVersion}{}
 
+\usepackage[utf8]{inputenc}
 \usepackage[english]{babel} % babel system, adjust the language of the content
 \PassOptionsToPackage{% setup clean thesis style
     figuresep=colon,%
@@ -35,7 +36,7 @@
     colorize=full,%
     colortheme=bluemagenta,%
     bibsys=biber,%
-    bibfile=notes,%
+    bibfile=report,%
     bibstyle=numeric-comp,%
     wrapfooter=false,%
 }{cleanthesis}
@@ -83,6 +84,48 @@
 \usepackage{enumitem}
 
 
+
+% Default fixed font does not support bold face
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{12} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{12}  % for normal
+
+% Custom colors
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\usepackage{listings}
+
+% Python style for highlighting
+\newcommand\pythonstyle{\lstset{
+language=Python,
+basicstyle=\ttm,
+morekeywords={self},              % Add keywords here
+keywordstyle=\ttb\color{deepblue},
+emph={MyClass,__init__},          % Custom highlighting
+emphstyle=\ttb\color{deepred},    % Custom highlighting style
+stringstyle=\color{deepgreen},
+frame=tb,                         % Any extra options here
+showstringspaces=false
+}}
+
+
+% Python environment
+\lstnewenvironment{python}[1][]
+{
+\pythonstyle
+\lstset{#1}
+}
+{}
+
+% Python for external files
+\newcommand\pythonexternal[2][]{{
+\pythonstyle
+\lstinputlisting[#1]{#2}}}
+
+% Python for inline
+\newcommand\pythoninline[1]{{\pythonstyle\lstinline!#1!}}
+
 \DeclareSymbolFont{euleroperators}{U}{eur}{m}{n}
 \SetSymbolFont{euleroperators}{bold}{U}{eur}{b}{n}
 
@@ -124,8 +167,9 @@
 
 \graphicspath{{img/}}
 \linespread{1.2}
-\numberwithin{equation}{section}
-\renewcommand{\thesection}{\arabic{section}}
+%\renewcommand{​​\thefigure}​​{​​\arabic{​​section}​​.\arabic{​​subsection}​​.\arabic{​​figure}​​}
+\numberwithin{​​equation}​​{​​section}
+\renewcommand{​​\thesection}​​{​​\arabic{​​section}​​}​​
 
 \title{\reportTitle}
 \author{\reportName\\GQCG}
@@ -154,8 +198,8 @@
     % --------------------------
     % rename document parts
     % --------------------------
-    \renewcaptionname{english}{\figurename}{Fig.}
-    \renewcaptionname{english}{\tablename}{Tab.}
+    \renewcaptionname{english}{\figurename}{Figure}
+    \renewcaptionname{english}{\tablename}{Table}
 
     \setcounter{tocdepth}{2}		% define depth of toc
 
@@ -167,7 +211,7 @@
     \pagestyle{maincontentstyle} 	% fancy header and footer
 
     % The following input statements correspond to the different chapters of these notes
-    \input{content/template-chapter.tex}
+    \input{content/report_RHF.tex}
     \clearpage
 
     % --------------------------
