@@ -250,19 +250,26 @@ its conditions is no longer met.
  
  \subsection{On Comparing Values}
  \label{subsec:step6.1}
- In Listing \ref{ls:Listing 6} we can see that there is a difference in the
- citeria for the density matrix and the energy. The reason here has to do with the way these 
- differences are calculated. We notice that the energy is calculated from the
- density 
- Indeed we see in Equation \ref{eq:energy} that the energy is calculated using a 
- product of the Fock matrix with the density matrix, when this Fock matrix is 
- already contains the density matrix as can be seen in Equation 
- \ref{eq: fock matrix}. 
+In Listing \ref{ls:Listing 6} we can see that there is a difference in the
+citeria for the density matrix and the energy. However when we look at the 
+equation we see that the energy uses the density matrix. Indeed we see in 
+Equation \ref{eq:energy} that the energy is calculated using a 
+product of the Fock matrix with the density matrix, which already uses the density
+matrix as can be seen in Equation \ref{eq: fock matrix}.
  
  \begin{equation} \label{eq: fock matrix}
      F_{\mu\nu} = H_{\mu\nu} + \sum^{AO}_{\lambda\sigma}[(\mu\nu|\lambda\sigma) - \frac{1}{2}(\mu\lambda|\nu\sigma)]
  \end{equation}
-criterion for the density matrix is the stricter criterion, even
+
+Considering that the root-mean-square of the density matrix uses all elements of 
+this matrix, we could say that the criterion for the density matrix is inherently
+the strictest, since the energy criterion only uses one single value and the 
+density matrix criterion uses a multitude of values that have to behave 
+accordingly. However, this expalanation is to simple. Since the energy uses 
+the density matrix, these conditions are in fact connected. In this case that 
+would mean that enforcing one condition is enough to enforce the other one. 
+We can indeed see that this is the case in Section \ref{sec: examples}. 
+
  
  \section{Some examples}
  \label{sec: examples}

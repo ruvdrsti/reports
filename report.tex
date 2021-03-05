@@ -84,7 +84,6 @@
 \usepackage{enumitem}
 
 
-
 % Default fixed font does not support bold face
 \DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{12} % for bold
 \DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{12}  % for normal
@@ -167,9 +166,12 @@ showstringspaces=false
 
 \graphicspath{{img/}}
 \linespread{1.2}
-%\renewcommand{​​\thefigure}​​{​​\arabic{​​section}​​.\arabic{​​subsection}​​.\arabic{​​figure}​​}
-\numberwithin{​​equation}​​{​​section}
-\renewcommand{​​\thesection}​​{​​\arabic{​​section}​​}​​
+\usepackage{chngcntr}
+\counterwithout{section}{chapter}
+\counterwithout{equation}{chapter}
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+
 
 \title{\reportTitle}
 \author{\reportName\\GQCG}
