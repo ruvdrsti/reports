@@ -5,6 +5,86 @@ This report will discuss the notebook we made on restricted Hartree-Fock theory.
  The same titles will be used, so you can follow along easily. 
  Relevant parts of the code will be displayed.
 
+ \section{Theoretical Approach}
+ \label{sec:theory}
+ Before we actually dive into the code, we will discuss the theory behind it.
+ The actual goal of this experiment is to calculate the energy of a molecule,
+ mainly to solve the Schrödinger equation for that molecule. This, unfortunatly,
+ is impossible. So we have to find an alternative. This alternative would be
+Hartree-Fock theory. Bluntly put we can define another operator, the Fock operator,
+that consists of one-electron operators and two-electron operators. This is 
+displayed in Equation \ref{eq: fock matrix}. 
+
+\begin{equation}\label{eq: fock matrix}
+    \hat{f}(1) = \hat{h}(1) + 2\sum_i^{N/2}\hat{J}_i - \sum_i^{N/2}\hat{K}_i
+\end{equation}
+ J is the Coulomb operator, it accounts for the interelectronic repulsion. K is 
+ exchange operator, that accounts for the stabilizing interaction between 
+ electrons that have the same spin. Please do keep in mind that Equation
+ \ref{eq: fock matrix} only holds for restricted closed shell systems, where the
+ amount of alpha-electrons equals the amount of beta-electrons. Now let us look
+ at the way these operators are defined. This is shown in Equations
+
+ \begin{equation}\label{eq:coulomb}
+    \hat{J}_i\chi_a(x_1) = \int\chi_i^*(x_j)\frac{1}{|\boldsymbol{r}_1 - \boldsymbol{r}_j|}\chi_i(x_j)dx_j\chi_a(x_1)
+ \end{equation}
+
+ \begin{equation}\label{eq:exchange}
+     \hat{K}_i\chi_a(x_1) = \int\chi_i^*(x_j)\frac{1}{|\boldsymbol{r}_1 - \boldsymbol{r}_j|}\chi_a(x_j)dx_j\chi_i(x_1)
+ \end{equation}
+The point here is the operators themselves depend on the orbitals. So we would
+need to know the orbitals to define our operator. It seems we are stuck again.
+However we can apply some mathemathical tricks to get us out of this impasse. 
+First we can assert that every function can be expressed as a linear combination
+of basis functions. We also know that the eigenfunctions of a Hermitian operator
+from such a set of basis functions. We begin by selecting a convenient basis set.
+This could be a set of atomic orbitals. Then we would solve the eigenproblem in
+Equation \ref{eq:eigenproblem}.
+
+\begin{equation}\label{eq:eigenproblem}
+    \boldsymbol{\hat{H}}^{core}\boldsymbol{C} = \boldsymbol{SC}c
+\end{equation} 
+Calculating the eigenvalues and eigenfucntions for the core Hamiltonian is 
+perfectly possible, since it is a one-electron operator. We now have a set of 
+orbitals which we can use to build our Fock operator. For this Fock operator, 
+we can solve the generalised eigenproblem in the form of the Roothaan-Hall 
+equations (see Equation \ref{eq:Roothaan-Hall}).
+
+\begin{equation}\label{eq:Roothaan-Hall}
+    \boldsymbol{FC} = \boldsymbol{SC}\epsilon
+\end{equation}
+
+Solving this equation will give us a set of eigenfunctions of the Fock matrix. 
+These functions can then be used to build a new Fock matrix. This is where we 
+start the iterations. We can continue untill we reach a point where the energy 
+does not change any more. At that point, we have found the energy of the molecule.
+
+At this point we still need to adress one topic, the density matrix. This will be
+very important since it will be used to calculate the Fock matrix in our program.
+To demonstrate what it is, we will look at the expression for the coulomb operator.
+When we take Equation \ref{eq:coulomb} and then expand the functions $\chi_i$ in
+a basis we find Equation \ref{eq:coulombexp}.
+
+\begin{equation}\label{eq:coulombexp}
+    \hat{J}_i = \int\sum_{\sigma}C^*_{\sigma}\phi^*_{\sigma}(x_j)\frac{1}{|\boldsymbol{r}_1 - \boldsymbol{r}_j|}\sum_{\nu}C_{\nu}\phi_{\nu}(x_j)dx_j
+\end{equation}
+
+The C factors in this equation are merely the exapansion coëficcients of the function
+$\chi_i$. These are constans, so we can safely extract them from the integrals to form
+Equation \ref{eq:coulombexp1}.
+
+\begin{equation}\label{eq:coulombexp1}
+    \hat{J}_i = \sum_{\sigma}\sum_{\nu}C_{\nu j}C^*_{\sigma j}\int\phi^*_{\sigma}(x_j)\frac{1}{|\boldsymbol{r}_1 - \boldsymbol{r}_j|}\phi_{\nu}(x_j)dx_j
+\end{equation}
+We can apply this same strategy to the exchange operator. In the end we will be
+able to factor out the products of the expansion coëficcients and afer summation
+over all basis functions we can define the density matrix as Equation 
+\ref{eq:densitymatrix}.
+
+\begin{equation}\label{eq:densitymatrix}
+    D_{\sigma\nu} = 2\sum^{N/2}_jC_{\sigma j}^*C_{\nu j}
+\end{equation}
+This will be used to calculate the Fock matrix. (see below)
 \section{Identifying the Molecule}
 \label{sec:step1}
 In this first step we initiated the class molecule, which will be equipped with 
@@ -109,13 +189,7 @@ This function uses the method \pythoninline{getEigenStuff}, which just calls
 the scipy function \pythoninline{linalg.eigh}. This solves the generalised 
 eigenproblem posed by the Roothaan-Hall equations \eqref{eq:Roothaan-Hall}, 
 for whatever matrix that is currently in the \pythoninline{self.guessMatrix} 
-parameter.
-
-\begin{equation}\label{eq:Roothaan-Hall}
-    \boldsymbol{FC} = \boldsymbol{SC}\epsilon
-\end{equation}
-
-C in Listing \ref{ls:Listing 3} then refers to \textbf{C} in Equation 
+parameter. C in Listing \ref{ls:Listing 3} then refers to \textbf{C} in Equation 
 \eqref{eq:Roothaan-Hall}. The first matrix for which we calculate the eigenvalues 
 and eigenvectors is the core Hamiltonian, so this will have to be stored as the 
 \pythoninline{self.guessMatrix} before proceeding. Now we are set to build a Fock 
@@ -146,15 +220,15 @@ We see that the Fock-matrix uses some the density matrix and the electronic
 repulsion matrix and the Hamiltonian , which the molecule object calls with the 
 methods seen in Section \ref{sec:step2}. Since the density matrix depends on the 
 current \pythoninline{self.guessMatrix}, the Fock matrix will also depend on it. 
-We can then see that the new Fock matrix is always derived from the previous one, 
-given that we update it during each step of the iteration.
+We will discuss the importance of this in \ref{subsec: iteration}. 
+
  
  \section{The SCF Energy}
  \label{sec:step5}
  From the Fock matrix we derived in the previous section, we can now calculate the electronic energy acoording to Equation \eqref{eq:energy}.
  
  \begin{equation} \label{eq:energy}
-     E_{elek} = \frac{1}{2}\sum_{\mu\nu}D_{\mu\nu}*(H_{\mu\nu} + F_{\mu\nu})
+     E_{elek} = \frac{1}{2}\sum_{\mu\nu}D_{\mu\nu}\cdot(H_{\mu\nu} + F_{\mu\nu})
  \end{equation}
  In python this looks like Listing \ref{ls:Listing 5}.
  
@@ -247,6 +321,17 @@ next iteration. This iterations energy is stored, as well as the density matrix.
 We print out a line that summarises all the relevant values for this iteration. 
 We can then move on to the next iterative step until the while loop finds one of 
 its conditions is no longer met.
+
+\subsection{On Iterations and the Molecule Object}
+\label{subsec: iteration}
+In this subsection we will discuss what the iteration actually does to the 
+molecule object allong the way. We call a lot of methods on the object, but those 
+do not change any of the fundamental properties of the object. Now pay special
+attention to the generating block, where we change the 
+\pythoninline{self.guessMatrix} to a new value. After this is done, all new values
+that are calculated will be based on the new matrix. This is the only value that 
+actually changes, but is has far reaching consequences on all the methods. 
+
  
  \subsection{On Comparing Values}
  \label{subsec:step6.1}
@@ -258,7 +343,7 @@ product of the Fock matrix with the density matrix, which already uses the densi
 matrix as can be seen in Equation \ref{eq: fock matrix}.
  
  \begin{equation} \label{eq: fock matrix}
-     F_{\mu\nu} = H_{\mu\nu} + \sum^{AO}_{\lambda\sigma}[(\mu\nu|\lambda\sigma) - \frac{1}{2}(\mu\lambda|\nu\sigma)]
+     F_{\mu\nu} = H_{\mu\nu} + \sum^{AO}_{\lambda\sigma}D_{\lambda\sigma}[(\mu\nu|\lambda\sigma) - \frac{1}{2}(\mu\lambda|\nu\sigma)]
  \end{equation}
 
 Considering that the root-mean-square of the density matrix uses all elements of 
