@@ -1,15 +1,17 @@
 \section{Introduction}
 \label{sec:intro}
 This report will discuss the notebook we made on restricted Hartree-Fock theory.
- We will walk trough the notebook step by step and discuss what we see there. 
- The same titles will be used, so you can follow along easily. 
- Relevant parts of the code will be displayed.
+We will walk trough the notebook step by step and discuss what we see there. 
+The same titles as in the notebook will be used, as to make sure the report can be 
+easily followed. Relevant parts of the code will be displayed.
 
  \section{Theoretical Approach}
  \label{sec:theory}
+ \subsection{Introduction to Theory}
+ \label{subsec:intro}
  Before we actually dive into the code, we will discuss the theory behind it.
  The actual goal of this experiment is to calculate the energy of a molecule,
- mainly to solve the Schrödinger equation for that molecule. This, unfortunatly,
+ mainly to solve the Schrödinger equation for that molecule. This, unfortunately,
  is impossible. So we have to find an alternative. This alternative would be
 Hartree-Fock theory. Bluntly put we can define another operator, the Fock operator,
 that consists of one-electron operators and two-electron operators. This is 
@@ -20,31 +22,148 @@ displayed in Equation \ref{eq: fock matrix}.
 \end{equation}
  J is the Coulomb operator, it accounts for the interelectronic repulsion. K is 
  exchange operator, that accounts for the stabilizing interaction between 
- electrons that have the same spin. Please do keep in mind that Equation
- \ref{eq: fock matrix} only holds for restricted closed shell systems, where the
- amount of alpha-electrons equals the amount of beta-electrons. Now let us look
- at the way these operators are defined. This is shown in Equations
+ electrons that have the same spin. 
+ \subsection{Deriving the Fock Operator}
+ \label{subsec:fock matrix}
+Let us step back a bit here to see where this operator comes from. To do that, we 
+need to begin with the true Hamiltonian for the system, which is given in Equation 
+\ref{eq:hamilthe}
+\begin{equation}\label{eq:hamilthe}
+    \hat{\boldsymbol{H}} = \sum_i^N\hat{h}(i) + \frac{1}{2}\sum_i^N\sum_j^N\frac{1}{|\boldsymbol{r}_i - \boldsymbol{r}_j|}
+\end{equation}
+$\hat{h}(i)$ is a one electron operator containing the potential energy of
+electron $i$ with respect to the nucleus and the kinetic energy of electron $i$.
+The second term accounts for interelectronic interactions. Now we also need a
+wavefunction $\Psi$, which is a Slater determinant. This determinant looks like
+Equation \ref{eq:slater}.
+\begin{equation}\label{eq:slater}
+    \Psi = 1/\sqrt{N!}\begin{vmatrix}
+        \chi_1(\boldsymbol{x}_1) & \cdots & \chi_n(\boldsymbol{x}_1) \\
+        \cdots & \cdots & \cdots \\
+        \chi_1(\boldsymbol{x}_n) & \cdots & \chi_n(\boldsymbol{x}_n)\\
+    \end{vmatrix}
+\end{equation}
+When we look at the individual functions $\chi_i(x_j)$ we can state Equation 
+\ref{eq:spinor}
+
+\begin{equation}\label{eq:spinor}
+    \chi_i(x_j) = \psi_i(\boldsymbol{x}_j)\gamma(\boldsymbol{\omega}_j)
+\end{equation}
+Here $\psi$ is a spatial orbital, $\gamma$ is a spin function, which can be either
+$\alpha$ or $\beta$. Now we have all the ingredients, we can start building the Fock
+matrix. The first step would be to calculate the expectation value of the 
+Hamiltonian over the wave function $\Psi$. First of all we assert that all spin-orbitals
+are normalised, so that $\braket{\chi_i}{\chi_i} = 1$. We will not give the exact 
+derivation here, but jump straight to the end result. This is given in Equation 
+\ref{eq:expect}.
+
+\begin{multline}\label{eq:expect} 
+    \bra{\Psi}\hat{\boldsymbol{H}}\ket{\Psi} = \sum_i^N\bra{\chi_i}\hat{h}(1)\ket{\chi_i} + \frac{1}{2}\sum_i^N\sum_j^N\left(\int\chi_i^*(1)\chi_i(1)\frac{1}{|\boldsymbol{r}_i- \boldsymbol{r}_j|}\chi_j^*(2)\chi_j(2)d1d2 \right.\\
+     \left. - \int\chi_i^*(1)\chi_j(1)\frac{1}{|\boldsymbol{r}_i - \boldsymbol{r}_j|}\chi_j^*(2)\chi_i(2)d1d2\right)
+\end{multline}
+This expectation value can always be calculated, even if $\Psi$ is not an eigenfucntion
+of the Hamiltonian. The only problem we have here is the choice of the spin-orbitals.
+We need to choose them in such a way that the energy is minimal. This would mean
+that the energy is a stationary point, so we enforce Equation \ref{eq:condition}.  
+\begin{equation}\label{eq:condition}
+    E(\chi_i + \delta\chi_i) - E(\chi_i) =\delta E = 0
+\end{equation}
+E is off course nothing else then the expectation value of the
+wave function $\Psi$ over the Hamiltonian. We could write $\bra{\Psi}\hat{\boldsymbol{H}}\ket{\Psi} = E(\chi_i)$. 
+Now we will enforce orthonormality of the spin-orbitals via a seperate function, as
+can be seen in Equation \ref{eq:lagrange}.
+\begin{equation}\label{eq:lagrange}
+    L = E - \sum_{ij}\epsilon_{ij}(\braket{\chi_i}{\chi_j} - \delta_{ij})
+\end{equation}
+Now we will calculate $\delta L$, this is possible with the information that is given.
+We will once again skip to the end. The final equation is given in Equation \ref{eq:deltaL}.
+\begin{equation}\label{eq:deltaL}
+    \delta L = \sum_i\bra{\delta\chi_i}\hat{h}(1) + \sum_j(\hat{J_j} - \hat{K_j})\ket{\chi_i} -  \sum_{ij}\epsilon_{ij}\braket{\delta\chi_i}{\chi_j} + complex\:conjugate = 0
+\end{equation}
+We have added the coulomb and exchange operators. When we define the expectation
+values as Equations \ref{eq:coulomb} and \ref{eq:exchange}, we see that we can indeed
+add them in this way.
 
  \begin{equation}\label{eq:coulomb}
-    \hat{J}_i\chi_a(x_1) = \int\chi_i^*(x_j)\frac{1}{|\boldsymbol{r}_1 - \boldsymbol{r}_j|}\chi_i(x_j)dx_j\chi_a(x_1)
+    \bra{\chi_i}\hat{J}_j\ket{\chi_i} = \int\chi_i^*(1)\chi_j^*(2)\frac{1}{|\boldsymbol{r}_i- \boldsymbol{r}_j|}\chi_i(1)\chi_j(2)d1d2
  \end{equation}
 
  \begin{equation}\label{eq:exchange}
-     \hat{K}_i\chi_a(x_1) = \int\chi_i^*(x_j)\frac{1}{|\boldsymbol{r}_1 - \boldsymbol{r}_j|}\chi_a(x_j)dx_j\chi_i(x_1)
+     \bra{\chi_i}\hat{K}_j\ket*{\chi_i} = \int\chi_i^*(1)\chi_j(1)\frac{1}{|\boldsymbol{r}_i - \boldsymbol{r}_j|}\chi_j^*(2)\chi_i(2)d1d2)
  \end{equation}
-The point here is the operators themselves depend on the orbitals. So we would
+When we check Equation \ref{eq:deltaL}, we see that it can only hold if Equation \ref{eq:fockeqpreq}
+and its counterpart from the complex conjugate both hold.
+
+\begin{equation}\label{eq:fockeqpreq}
+    \left(\hat{h}(1) + \sum_j(\hat{J_j} - \hat{K_j})\right)\chi_i = \sum_{j}\epsilon_{ij}\chi_j
+\end{equation}
+These two equations allow us to conclude that $\epsilon^*_{ij} = \epsilon_{ji}$.
+These factors are called the Lagrange multipliers and form a Hermitian matrix. 
+When we take a closer look at the operator in Equation \ref{eq:fockeqpreq}, we 
+can recognise the Fock operator from Equation \ref{eq: fock matrix}, although
+we are not quite there yet. However we can already write some interesting equations
+with the formulas we have. We can write Equation \ref{eq:fockeq}.
+
+\begin{equation}\label{eq:fockeq}
+    \hat{f}(1)\chi_i = \epsilon_i\chi_i
+\end{equation}
+These equations are called the Hartree Fock equations.
+\subsection{Restricted Hartree-Fock}
+\label{subsec:RHF}
+As we said in the last subsection, we are not quite where we want to be just yet.
+We need to get to the Fock matrix from Equation \ref{eq: fock matrix}, but we are
+only at the one in \ref{eq:fockeqpreq}. This is where we will make the jump to
+restricted Hartree Fock theory. To start, we will take a look at Equation \ref{eq:spinor}.
+Here we saw that the spin-orbital is actually a product of a spatial orbital and
+a spin function. When we take a look at our operators however, we notice that none
+of them will actually interact with this spin function. We would then like to get rid
+of it. Doing this is actually not that difficult. If we would collect all functions
+that have $\alpha$ as their spin component, we can write a Hartree-Fock equation and
+then simply integrate the spin component out by adding $\bra{\alpha}$ on every
+side of the equation. For the one electron part and the coulomb operators, there is
+no problem at all, since all electrons stay in their respective orbitals. However,
+the exchange operator will move electrons around to different spin-orbitals.(see 
+Equation \ref{eq:exchange}) When the electron from an $alpha$ spin-orbital would
+be moved to a $beta$ spin-orbital, this would result in a zero, since $\bra{\alpha}\ket{\beta} = 0$
+So here it is clear that the exchange operator will only remain active after spin 
+elimination between electrons that have the same spin function. So now that we have
+gotten rid of spin, all that is left is Equation \ref{eq:spinelim}.
+
+\begin{equation}\label{eq:spinelim}
+    \hat{f}^{\alpha}(1)\psi^{\alpha}_i = \epsilon^{\alpha}_i\psi^{\alpha}_i
+\end{equation}
+Off course the same argument stands for the $\beta$-spins.
+
+Now we have come to a point where we can define a restricted closed shell system.
+Imagine what would happen if all orbitals were doubly occupied, with an $\alpha$
+and a $\beta$ electron, all according to the Pauli princple. This has some consequences.
+The first one is that the amount of $\alpha$-electrons would equal the amount of
+$\beta$-electrons. Secondly, this would mean that the difference between these electrons
+is only their spin function. They reside in the same orbitals. This means that we only
+need to account for half the electrons, since the other half is in the same orbitals,
+just with a different spin. Now think about the Fock operator. Let us
+take a look at a single electron. It has a one election hamiltonian, electronic repulsion
+for all other electrons in the system and it only "exchanges" with half of the other
+electrons, only those with the same spin. This means we have a double the amount of 
+coulomb operators to exchange operators. When we now look back at Equation \ref{eq: fock matrix},
+we see that we are finally there.
+
+\subsection{Application of the Hartree-Fock Theory}
+\label{subsec:applic}
+At this point, we might think back to the point where we defined the coulomb and
+exchange operators. These operators themselves depend on the orbitals. So we would
 need to know the orbitals to define our operator. It seems we are stuck again.
 However we can apply some mathemathical tricks to get us out of this impasse. 
 First we can assert that every function can be expressed as a linear combination
 of basis functions. We also know that the eigenfunctions of a Hermitian operator
-from such a set of basis functions. We begin by selecting a convenient basis set.
+form such a set of basis functions. We begin by selecting a convenient basis set.
 This could be a set of atomic orbitals. Then we would solve the eigenproblem in
 Equation \ref{eq:eigenproblem}.
 
 \begin{equation}\label{eq:eigenproblem}
     \boldsymbol{\hat{H}}^{core}\boldsymbol{C} = \boldsymbol{SC}c
 \end{equation} 
-Calculating the eigenvalues and eigenfucntions for the core Hamiltonian is 
+Calculating the eigenvalues and eigenfunctions for the core Hamiltonian is 
 perfectly possible, since it is a one-electron operator. We now have a set of 
 orbitals which we can use to build our Fock operator. For this Fock operator, 
 we can solve the generalised eigenproblem in the form of the Roothaan-Hall 
@@ -59,18 +178,47 @@ These functions can then be used to build a new Fock matrix. This is where we
 start the iterations. We can continue untill we reach a point where the energy 
 does not change any more. At that point, we have found the energy of the molecule.
 
+Before we move on, some clarifications are in order. 
+\begin{enumerate}
+    \item The basis set we choose is not the same as the set that is derived
+    from the eigenfunctions of the Hamiltonian. These eigenfunctions are in fact
+    our first guess of the actual molecular orbitals. However, this guess will not be
+    very good yet, since off course the core Hamiltonian is not the same as the 
+    molecular Hamiltonian. 
+    \item A basis set is often chosen for the ease of integration. Often, these
+    are Gaussian functions. So we can see that the chosen basis set does not
+    need to have the same properties as the eigenfunctions of the Hamiltonian. 
+    Off course the functions do have to be "well-behaved". The size however, will always be the same.
+    If you choose a basis set with only two functions, your Hamiltonian will have only
+    two eigenfunctions. The bigger the basis set, the more eigenfunctions you will have. 
+    \item We are using an expansion of a function in a basis. That is always possible.
+    However, there is always a catch, namely that the basis set used has to be complete.
+    In most cases this would actually mean that it is infinitely large, so of no
+    real use to us. However, if we choose an incomplete set, we will only be able
+    to make approximations.
+    \item If we want to do the expansion, we need to integrate the spin out first.
+    So we need to end up with an expansion that is only dependant on the spacial
+    orbital, like in Equation \ref{eq:expansion}.
+    \begin{equation}\label{eq:expansion}
+        \psi_i = \sum_jC_{ji}\phi_j
+    \end{equation}
+\end{enumerate}
+
+\subsection{The Density Matrix}
+\label{subsec:theDM}
 At this point we still need to adress one topic, the density matrix. This will be
 very important since it will be used to calculate the Fock matrix in our program.
 To demonstrate what it is, we will look at the expression for the coulomb operator.
 When we take Equation \ref{eq:coulomb} and then expand the functions $\chi_i$ in
-a basis we find Equation \ref{eq:coulombexp}.
+a basis after eliminating the spin, we find Equation \ref{eq:coulombexp}.
 
 \begin{equation}\label{eq:coulombexp}
     \hat{J}_i = \int\sum_{\sigma}C^*_{\sigma}\phi^*_{\sigma}(x_j)\frac{1}{|\boldsymbol{r}_1 - \boldsymbol{r}_j|}\sum_{\nu}C_{\nu}\phi_{\nu}(x_j)dx_j
 \end{equation}
 
 The C factors in this equation are merely the exapansion coëficcients of the function
-$\chi_i$. These are constans, so we can safely extract them from the integrals to form
+$\psi_i$.(Rememmber that this is the spatial orbital, see Equation \ref{eq:spinor})
+These are constans, so we can safely extract them from the integrals to form
 Equation \ref{eq:coulombexp1}.
 
 \begin{equation}\label{eq:coulombexp1}
@@ -84,7 +232,14 @@ over all basis functions we can define the density matrix as Equation
 \begin{equation}\label{eq:densitymatrix}
     D_{\sigma\nu} = 2\sum^{N/2}_jC_{\sigma j}^*C_{\nu j}
 \end{equation}
-This will be used to calculate the Fock matrix. (see below)
+This will be used to calculate the Fock matrix. (see below). However, before we 
+move on, there is something noteworthy here. We only have to account for the 
+occupied orbitals $j$. Let us take the example where there are seven eigenfucntions
+and only ten electrons. In restricted closed shell Hartree Fock that would mean
+five doubly occupied orbitals. We would only have to consider the five occupied
+orbitals here. You would still end up with a seven by seven density matrix. This
+can be seen more clearly in Section \ref{sec:step3}.
+
 \section{Identifying the Molecule}
 \label{sec:step1}
 In this first step we initiated the class molecule, which will be equipped with 
@@ -115,7 +270,7 @@ A molecule object has several properties that need to be defined first.
 \end{python}
   
 
-In Listing \ref{ls:Listing 1} we the \pythoninline{__innit__} method of the 
+In Listing \ref{ls:Listing 1} we define the \pythoninline{__innit__} method of the 
 molecule class. It sets us up with some of the information we will need later, 
 namely the \pythoninline{psi4.core.Molecule} representation as 
 \pythoninline{self.id}. We also see the wave function, basis set, 
@@ -145,11 +300,11 @@ This is shown in Listing \ref{ls:Listing 2}.
 
 In this section, we do some prerequisite calculations. These are relatively 
 straightforward. In this step, we added some methods to the class that allow us to 
-calculate important properties like the nuclear repulsion kinetic energy and so 
+calculate important properties like the nuclear repulsion, kinetic energy and so 
 on. The commands used are directly implemented from the psi4 package. 
 They are listed in Table \ref{tab:commands}
 
-\begin{table}[hp]
+\begin{table}[H]
     \centering
     \begin{tabular}{c|c}
         command & property \\
@@ -187,10 +342,10 @@ We will skip ahead to the function that gives us the density matrix and start
 
 This function uses the method \pythoninline{getEigenStuff}, which just calls 
 the scipy function \pythoninline{linalg.eigh}. This solves the generalised 
-eigenproblem posed by the Roothaan-Hall equations \eqref{eq:Roothaan-Hall}, 
+eigenproblem posed by the Roothaan-Hall equations, Equation \ref{eq:Roothaan-Hall}, 
 for whatever matrix that is currently in the \pythoninline{self.guessMatrix} 
 parameter. C in Listing \ref{ls:Listing 3} then refers to \textbf{C} in Equation 
-\eqref{eq:Roothaan-Hall}. The first matrix for which we calculate the eigenvalues 
+\ref{eq:Roothaan-Hall}. The first matrix for which we calculate the eigenvalues 
 and eigenvectors is the core Hamiltonian, so this will have to be stored as the 
 \pythoninline{self.guessMatrix} before proceeding. Now we are set to build a Fock 
 matrix.
@@ -216,21 +371,22 @@ matrix.
 \end{python}
  
  
-We see that the Fock-matrix uses some the density matrix and the electronic 
+We see that the Fock-matrix uses the density matrix and the electronic 
 repulsion matrix and the Hamiltonian , which the molecule object calls with the 
 methods seen in Section \ref{sec:step2}. Since the density matrix depends on the 
 current \pythoninline{self.guessMatrix}, the Fock matrix will also depend on it. 
-We will discuss the importance of this in \ref{subsec: iteration}. 
+We will discuss the importance of this in Subsection \ref{subsec: iteration}. 
 
  
  \section{The SCF Energy}
  \label{sec:step5}
- From the Fock matrix we derived in the previous section, we can now calculate the electronic energy acoording to Equation \eqref{eq:energy}.
+ From the Fock matrix we derived in the previous section, we can now calculate 
+ the electronic energy according to Equation \eqref{eq:energy}.
  
  \begin{equation} \label{eq:energy}
      E_{elek} = \frac{1}{2}\sum_{\mu\nu}D_{\mu\nu}\cdot(H_{\mu\nu} + F_{\mu\nu})
  \end{equation}
- In python this looks like Listing \ref{ls:Listing 5}.
+ In Python this looks like Listing \ref{ls:Listing 5}.
  
  
     
@@ -340,9 +496,9 @@ citeria for the density matrix and the energy. However when we look at the
 equation we see that the energy uses the density matrix. Indeed we see in 
 Equation \ref{eq:energy} that the energy is calculated using a 
 product of the Fock matrix with the density matrix, which already uses the density
-matrix as can be seen in Equation \ref{eq: fock matrix}.
+matrix as can be seen in Equation \ref{eq: fock-matrix}.
  
- \begin{equation} \label{eq: fock matrix}
+ \begin{equation} \label{eq: fock-matrix}
      F_{\mu\nu} = H_{\mu\nu} + \sum^{AO}_{\lambda\sigma}D_{\lambda\sigma}[(\mu\nu|\lambda\sigma) - \frac{1}{2}(\mu\lambda|\nu\sigma)]
  \end{equation}
 
