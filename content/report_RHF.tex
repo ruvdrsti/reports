@@ -20,7 +20,7 @@ displayed in Equation \ref{eq: fock matrix}.
 \begin{equation}\label{eq: fock matrix}
     \hat{f}(1) = \hat{h}(1) + 2\sum_i^{N/2}\hat{J}_i - \sum_i^{N/2}\hat{K}_i
 \end{equation}
- J is the Coulomb operator, it accounts for the interelectronic repulsion. K is 
+ $\hat{J}$ is the Coulomb operator, it accounts for the interelectronic repulsion. $\hat{K}$ is 
  exchange operator, that accounts for the stabilizing interaction between 
  electrons that have the same spin. 
  \subsection{Deriving the Fock Operator}
@@ -33,23 +33,23 @@ need to begin with the true Hamiltonian for the system, which is given in Equati
 \end{equation}
 $\hat{h}(i)$ is a one electron operator containing the potential energy of
 electron $i$ with respect to the nucleus and the kinetic energy of electron $i$.
-The second term accounts for interelectronic interactions. Now we also need a
+The second term accounts for interelectronic interactions. Now, we also need a
 wavefunction $\Psi$, which is a Slater determinant. This determinant looks like
 Equation \ref{eq:slater}.
 \begin{equation}\label{eq:slater}
-    \Psi = 1/\sqrt{N!}\begin{vmatrix}
+    \ket{\Psi} = 1/\sqrt{N!}\begin{vmatrix}
         \chi_1(\boldsymbol{x}_1) & \cdots & \chi_n(\boldsymbol{x}_1) \\
         \cdots & \cdots & \cdots \\
         \chi_1(\boldsymbol{x}_n) & \cdots & \chi_n(\boldsymbol{x}_n)\\
     \end{vmatrix}
 \end{equation}
-When we look at the individual functions $\chi_i(x_j)$ we can state Equation 
+When we look at the individual functions $\chi_i(\boldsymbol{x}_j)$ we can state Equation 
 \ref{eq:spinor}
 
 \begin{equation}\label{eq:spinor}
-    \chi_i(x_j) = \psi_i(\boldsymbol{x}_j)\gamma(\boldsymbol{\omega}_j)
+    \chi_i(\boldsymbol{x_j}) = \psi_i(\boldsymbol{r}_j)\gamma(\boldsymbol{\omega}_j)
 \end{equation}
-Here $\psi$ is a spatial orbital, $\gamma$ is a spin function, which can be either
+Here, $\psi$ is a spatial orbital, $\gamma$ is a spin function, which can be either
 $\alpha$ or $\beta$. Now we have all the ingredients, we can start building the Fock
 matrix. The first step would be to calculate the expectation value of the 
 Hamiltonian over the wave function $\Psi$. First of all we assert that all spin-orbitals
@@ -80,7 +80,7 @@ We will once again skip to the end. The final equation is given in Equation \ref
 \begin{equation}\label{eq:deltaL}
     \delta L = \sum_i\bra{\delta\chi_i}\hat{h}(1) + \sum_j(\hat{J_j} - \hat{K_j})\ket{\chi_i} -  \sum_{ij}\epsilon_{ij}\braket{\delta\chi_i}{\chi_j} + complex\:conjugate = 0
 \end{equation}
-We have added the coulomb and exchange operators. When we define the expectation
+We have added the Coulomb and exchange operators. When we define the expectation
 values as Equations \ref{eq:coulomb} and \ref{eq:exchange}, we see that we can indeed
 add them in this way.
 
@@ -120,7 +120,7 @@ of them will actually interact with this spin function. We would then like to ge
 of it. Doing this is actually not that difficult. If we would collect all functions
 that have $\alpha$ as their spin component, we can write a Hartree-Fock equation and
 then simply integrate the spin component out by adding $\bra{\alpha}$ on every
-side of the equation. For the one electron part and the coulomb operators, there is
+side of the equation. For the one electron part and the Coulomb operators, there is
 no problem at all, since all electrons stay in their respective orbitals. However,
 the exchange operator will move electrons around to different spin-orbitals.(see 
 Equation \ref{eq:exchange}) When the electron from an $alpha$ spin-orbital would
@@ -145,12 +145,12 @@ just with a different spin. Now think about the Fock operator. Let us
 take a look at a single electron. It has a one election hamiltonian, electronic repulsion
 for all other electrons in the system and it only "exchanges" with half of the other
 electrons, only those with the same spin. This means we have a double the amount of 
-coulomb operators to exchange operators. When we now look back at Equation \ref{eq: fock matrix},
+Coulomb operators to exchange operators. When we now look back at Equation \ref{eq: fock matrix},
 we see that we are finally there.
 
 \subsection{Application of the Hartree-Fock Theory}
 \label{subsec:applic}
-At this point, we might think back to the point where we defined the coulomb and
+At this point, we might think back to the point where we defined the Coulomb and
 exchange operators. These operators themselves depend on the orbitals. So we would
 need to know the orbitals to define our operator. It seems we are stuck again.
 However we can apply some mathemathical tricks to get us out of this impasse. 
@@ -183,12 +183,12 @@ Before we move on, some clarifications are in order.
     \item The basis set we choose is not the same as the set that is derived
     from the eigenfunctions of the Hamiltonian. These eigenfunctions are in fact
     our first guess of the actual molecular orbitals. However, this guess will not be
-    very good yet, since off course the core Hamiltonian is not the same as the 
+    very good yet, since of course the core Hamiltonian is not the same as the 
     molecular Hamiltonian. 
     \item A basis set is often chosen for the ease of integration. Often, these
     are Gaussian functions. So we can see that the chosen basis set does not
     need to have the same properties as the eigenfunctions of the Hamiltonian. 
-    Off course the functions do have to be "well-behaved". The size however, will always be the same.
+    Of course the functions do have to be "well-behaved". The size however, will always be the same.
     If you choose a basis set with only two functions, your Hamiltonian will have only
     two eigenfunctions. The bigger the basis set, the more eigenfunctions you will have. 
     \item We are using an expansion of a function in a basis. That is always possible.
@@ -197,7 +197,7 @@ Before we move on, some clarifications are in order.
     real use to us. However, if we choose an incomplete set, we will only be able
     to make approximations.
     \item If we want to do the expansion, we need to integrate the spin out first.
-    So we need to end up with an expansion that is only dependant on the spacial
+    So we need to end up with an expansion that is only dependent on the spacial
     orbital, like in Equation \ref{eq:expansion}.
     \begin{equation}\label{eq:expansion}
         \psi_i = \sum_jC_{ji}\phi_j
@@ -208,7 +208,7 @@ Before we move on, some clarifications are in order.
 \label{subsec:theDM}
 At this point we still need to adress one topic, the density matrix. This will be
 very important since it will be used to calculate the Fock matrix in our program.
-To demonstrate what it is, we will look at the expression for the coulomb operator.
+To demonstrate what it is, we will look at the expression for the Coulomb operator.
 When we take Equation \ref{eq:coulomb} and then expand the functions $\chi_i$ in
 a basis after eliminating the spin, we find Equation \ref{eq:coulombexp}.
 
@@ -216,9 +216,9 @@ a basis after eliminating the spin, we find Equation \ref{eq:coulombexp}.
     \hat{J}_i = \int\sum_{\sigma}C^*_{\sigma}\phi^*_{\sigma}(x_j)\frac{1}{|\boldsymbol{r}_1 - \boldsymbol{r}_j|}\sum_{\nu}C_{\nu}\phi_{\nu}(x_j)dx_j
 \end{equation}
 
-The C factors in this equation are merely the exapansion coëficcients of the function
+The C factors in this equation are merely the exapansion coeficcients of the function
 $\psi_i$.(Rememmber that this is the spatial orbital, see Equation \ref{eq:spinor})
-These are constans, so we can safely extract them from the integrals to form
+These are constants, so we can safely extract them from the integrals to form
 Equation \ref{eq:coulombexp1}.
 
 \begin{equation}\label{eq:coulombexp1}
@@ -481,7 +481,7 @@ its conditions is no longer met.
 \subsection{On Iterations and the Molecule Object}
 \label{subsec: iteration}
 In this subsection we will discuss what the iteration actually does to the 
-molecule object allong the way. We call a lot of methods on the object, but those 
+molecule object along the way. We call a lot of methods on the object, but those 
 do not change any of the fundamental properties of the object. Now pay special
 attention to the generating block, where we change the 
 \pythoninline{self.guessMatrix} to a new value. After this is done, all new values
